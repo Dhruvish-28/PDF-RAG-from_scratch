@@ -6,8 +6,9 @@ import re
 import os
 
 def read_pdf(doc_name):
+    "Reads the pdf , extracts text amd returns cleaned text"
 
-    reader = PdfReader(f"data/{doc_name}")
+    reader = PdfReader(f"data/{doc_name}") 
 
     text = ""
 
@@ -18,13 +19,18 @@ def read_pdf(doc_name):
         if page_text:
             text += page_text
 
-    text = text.replace("\n", " ")
-    text = re.sub(r"\s+", " ", text)
+    text = text.replace("\n", " ") # replace new line characters with spaces
+    text = re.sub(r"\s+", " ", text) # removes extra spaces caused due to \n removal
 
     return text
 
 
 def chunk_text(text, chunk_size=300, overlap=50):
+    """parameters: text (actual cleaned text returned from read_pdf func() 
+
+    chunk_size = 300 (default) size each chunk will be broken into
+    overlap = 50 (default) overlapping between each chunks to not loose any information mid chunk
+    """
 
     words = text.split()
 
@@ -46,15 +52,25 @@ def chunk_text(text, chunk_size=300, overlap=50):
 
 
 def generate_embeddings(chunks):
+    "creates embedding of created chunks through transformer model"
 
     return model.encode(chunks)
 
 
 def ingest(doc_name):
 
-    output_folder = f"vector_db/{doc_name}"
+    """ integrates all the following functions:
+    read_pdf(doc_name),
+    chunk_text(text , chunk_size , overlap)
+    generate_embeddings(chunks)
 
-    os.makedirs(output_folder, exist_ok=True)
+    Also saves the chunks and their embeddings to a newly created folder in JSON and .npy formats respectively
+    chunks.json and embeddings.npy
+    """
+
+    output_folder = f"vector_db/{doc_name}" 
+
+    os.makedirs(output_folder, exist_ok=True) #makes vector_db folder
 
     text = read_pdf(doc_name)
 
