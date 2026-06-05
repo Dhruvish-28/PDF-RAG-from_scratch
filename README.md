@@ -239,12 +239,12 @@ python ask.py
 ```
 
 Provide the PDF path when prompted.
-
+*Prepare a data folder having your pdfs and then just provide names as it auto assumes the path : "data/research_notes.pdf"*
 Example:
 
 ```text
 Enter PDF Path:
-data/research_notes.pdf
+research_notes.pdf
 ```
 
 The system automatically:
