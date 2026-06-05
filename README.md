@@ -244,7 +244,7 @@ Example:
 
 ```text
 Enter PDF Path:
-data/research_notes.pdf
+research_notes.pdf
 ```
 
 The system automatically:
