@@ -26,5 +26,4 @@ while True:
 
     answer = generate_answer(query , chunks , chunk_embedding) # Obtains LLM response
 
-    print("\nAnswer:\n")
-    print(answer)
+    return answer
