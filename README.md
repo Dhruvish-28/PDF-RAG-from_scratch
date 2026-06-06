@@ -1,10 +1,50 @@
 # 📄 PDF RAG Chatbot (From Scratch)
 
-A Retrieval-Augmented Generation (RAG) chatbot built from scratch using Python, Sentence Transformers, Cosine Similarity Retrieval, and Google's Gemini API.
+## 📌 Project Overview
 
-Unlike many RAG projects that rely on frameworks such as LangChain, this project implements the complete retrieval pipeline manually to gain a deeper understanding of embeddings, vector search, retrieval, prompt engineering, and LLM integration.
+Built a Retrieval-Augmented Generation (RAG) chatbot from scratch without LangChain using Sentence Transformers, cosine similarity retrieval, Gemini 2.5 Flash, and Streamlit.
 
----
+The system converts uploaded PDFs into vector embeddings, retrieves relevant document chunks using semantic search, and generates grounded answers while displaying source pages and retrieval scores for transparency.
+
+## Why Build Without LangChain?
+
+This project intentionally avoids LangChain to gain hands-on understanding of:
+
+- PDF Processing
+- Chunking Strategies
+- Embedding Generation
+- Vector Storage
+- Semantic Retrieval
+- Prompt Construction
+- LLM Integration
+
+Every stage of the RAG pipeline is implemented manually.
+
+## 📸 Application Preview
+
+### Main Interface
+
+![Application interface](results/WEB_UI.png)
+
+### Retrieval Transparency
+
+![Working model](results/working.png)
+
+Shows:
+- Application UI
+- Working model
+
+## 🔍 Retrieval Transparency
+
+The system exposes retrieved chunks to the user.
+
+For every answer the application displays:
+
+- Similarity Score
+- Source Page Number
+- Retrieved Context
+
+This allows users to verify where information originated before trusting the generated answer.
 
 ## 🚀 Features
 
@@ -16,7 +56,6 @@ Unlike many RAG projects that rely on frameworks such as LangChain, this project
 * Top-K Retrieval using Cosine Similarity
 * Prompt Engineering for Grounded Responses
 * Gemini API Integration
-* Multi-Document Support
 * Automated PDF Ingestion Pipeline
 * Built Completely Without LangChain
 
@@ -27,13 +66,13 @@ Unlike many RAG projects that rely on frameworks such as LangChain, this project
 ## Document Ingestion Pipeline
 
 ```text
-PDF Document
+PDF Upload
       │
       ▼
 Text Extraction
       │
       ▼
-Text Cleaning
+Page Metadata Capture
       │
       ▼
 Chunking
@@ -42,7 +81,10 @@ Chunking
 Embedding Generation
       │
       ▼
-Store Chunks + Embeddings
+Store:
+  • Chunk Text
+  • Page Number
+  • Embeddings
 ```
 
 Generated files are stored as:
@@ -203,7 +245,13 @@ Answer
 | Environment Variables | python-dotenv         |
 | Data Storage          | JSON                  |
 
----
+| Parameter | Value |
+|------------|--------|
+| Embedding Model | all-MiniLM-L6-v2 |
+| Embedding Dimension | 384 |
+| Chunk Size | 300 Words |
+| Chunk Overlap | 50 Words |
+| Top-K Retrieval | 3 |
 
 # ⚙️ Installation
 
@@ -232,20 +280,19 @@ GEMINI_API_KEY=YOUR_API_KEY
 
 ## Ingest a PDF
 
-Run:
+## ▶️ Run Application
 
 ```bash
-python ask.py
-```
+streamlit run app.py
 
-Provide the PDF path when prompted.
-*Prepare a data folder having your pdfs and then just provide names as it auto assumes the path : "data/research_notes.pdf"*
-Example:
+Steps:
 
-```text
-Enter PDF Path:
-research_notes.pdf
-```
+1. Upload a PDF
+2. Wait for ingestion
+3. Ask questions
+4. View retrieved chunks and source pages
+5. Inspect similarity scores
+
 
 The system automatically:
 
@@ -282,15 +329,23 @@ A research problem is the first and most important step in the research process.
 
 ---
 
-# 🔮 Future Improvements
+## 7. Update Future Improvements
 
-* FAISS Vector Database Integration
-* Streamlit Web Interface
-* Source Citation Support
-* Hybrid Search (Keyword + Semantic)
-* Conversation Memory
-* Multi-PDF Retrieval
-* Metadata-Based Filtering
+Current list includes Streamlit UI and Multi-PDF support, but you've already completed Streamlit. :contentReference[oaicite:3]{index=3}
+
+Replace with:
+
+```md
+## 🔮 Future Improvements
+
+- FAISS Integration
+- Multi-PDF Retrieval
+- Cross-Document Search
+- Source Citations in Answers
+- Conversation Memory
+- Metadata Filtering
+- Retrieval Evaluation Metrics
+- Cloud Deployment
 
 ---
 
