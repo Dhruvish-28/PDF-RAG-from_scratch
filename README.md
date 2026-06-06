@@ -134,10 +134,8 @@ Final Answer
 ```text
 RAG_Project/
 
-│
-├── models/
-│   ├── embedding_model.py
-│   └── gemini_model.py
+│── embedding_model.py
+│── gemini_model.py
 │
 ├── vector_db/
 │
@@ -145,14 +143,15 @@ RAG_Project/
 ├── chunking.py
 ├── create_embeddings.py
 │
-├── ingest.py
+├── ingestion.py
 │
 ├── retrieve.py
 ├── prompt_builder.py
 ├── generate_answer.py
 │
-├── ask.py
-│
+├── ask.py 
+├── app.py
+|
 ├── requirements.txt
 └── README.md
 ```
@@ -187,7 +186,7 @@ Chunk 3 → [384 values]
 User Question:
 
 ```text
-What is a research problem?
+What should a research problem include
 ```
 
 ↓
@@ -278,10 +277,7 @@ GEMINI_API_KEY=YOUR_API_KEY
 
 # ▶️ Usage
 
-## Ingest a PDF
-
-## ▶️ Run Application
-
+Initialise entry point by following command:
 ```bash
 streamlit run app.py
 
