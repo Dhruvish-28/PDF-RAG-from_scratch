@@ -21,5 +21,5 @@ def generate_answer(query, chunks , chunk_embedding):
     print(f"Similarity Scores of top 3 chunks: {score}")
     
     response = model.generate_content(prompt)
-
-    return response.text
+    
+    return selected_chunks, response.text

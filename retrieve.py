@@ -28,8 +28,9 @@ def retrieval(query , chunks , chunk_embedding,top_k = 3):
         
         retrieved_chunks.append({
             "index": idx,
+            "page" : chunks[idx]["page"],
             "score": score,
-            "chunk": chunks[idx]
+            "chunk": chunks[idx]["chunk"]
         })
 
     return retrieved_chunks

@@ -5,33 +5,36 @@ import json
 import re
 import os
 
-def read_pdf(doc_name):
+def read_pdf(pdf_path):
     "Reads the pdf , extracts text amd returns cleaned text"
 
-    reader = PdfReader(f"data/{doc_name}") 
+    reader = PdfReader(pdf_path) 
 
-    text = ""
+    page_count = len(reader.pages)
 
-    for page in reader.pages:
+    pages = []
 
-        page_text = page.extract_text()
+    for page_num, page in enumerate(reader.pages):
+        text = page.extract_text()
 
-        if page_text:
-            text += page_text
+        
+        text = text.replace("\n", " ") # replace new line characters with spaces
+        text = re.sub(r"\s+", " ", text) # removes extra spaces caused due to \n removal
+        
+        pages.append({
+        "page": page_num + 1,
+        "text": text
+    })
 
-    text = text.replace("\n", " ") # replace new line characters with spaces
-    text = re.sub(r"\s+", " ", text) # removes extra spaces caused due to \n removal
 
-    return text
+    return page_count , pages
 
-
-def chunk_text(text, chunk_size=300, overlap=50):
+def create_chunk(text, chunk_size=300, overlap=50):
     """parameters: text (actual cleaned text returned from read_pdf func() 
 
     chunk_size = 300 (default) size each chunk will be broken into
     overlap = 50 (default) overlapping between each chunks to not loose any information mid chunk
     """
-
     words = text.split()
 
     chunks = []
@@ -50,6 +53,22 @@ def chunk_text(text, chunk_size=300, overlap=50):
 
     return chunks
 
+def pages_chunk(pages):
+    
+    all_chunks = []
+
+    for page_data in pages:
+
+        page_chunks = create_chunk(page_data["text"])
+
+        for chunk in page_chunks:
+
+            all_chunks.append({
+                "page": page_data["page"],
+                "chunk": chunk
+            })
+
+    return all_chunks
 
 def generate_embeddings(chunks):
     "creates embedding of created chunks through transformer model"
@@ -57,7 +76,7 @@ def generate_embeddings(chunks):
     return model.encode(chunks)
 
 
-def ingest(doc_name):
+def ingest(pdf_path):
 
     """ integrates all the following functions:
     read_pdf(doc_name),
@@ -67,16 +86,21 @@ def ingest(doc_name):
     Also saves the chunks and their embeddings to a newly created folder in JSON and .npy formats respectively
     chunks.json and embeddings.npy
     """
+    pdf_name = os.path.splitext(
+        os.path.basename(pdf_path)
+    )[0]
 
-    output_folder = f"vector_db/{doc_name}" 
+    output_folder = f"vector_db/{pdf_name}"
 
-    os.makedirs(output_folder, exist_ok=True) #makes vector_db folder
+    os.makedirs(output_folder, exist_ok=True)
 
-    text = read_pdf(doc_name)
+    page_count , pages = read_pdf(pdf_path)
 
-    chunks = chunk_text(text)
-
-    embeddings = generate_embeddings(chunks)
+    chunks = pages_chunk(pages)
+    
+    chunk_texts = [c["chunk"] for c in chunks]
+    
+    embeddings = generate_embeddings(chunk_texts)
 
     with open(
         f"{output_folder}/chunks.json",
@@ -91,8 +115,11 @@ def ingest(doc_name):
         embeddings
     )
 
-    print(f"Ingestion Complete : {doc_name}")
+    metadata = {
+        "Pdf name" : pdf_name,
+        "pages" : page_count,
+        "total chunks" : len(chunks),
+        "chunks" : chunks
+    }
 
-    print(f"Chunks : {len(chunks)}")
-
-    print(f"Saved To : {output_folder}")
+    return metadata

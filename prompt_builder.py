@@ -5,10 +5,11 @@ def build_prompt(chunks , query):
     """
     context = ""
     score = []
+
     
     for i, chunk in enumerate(chunks, start=1):
         context += f"Chunk {i}:\n"
-        context += chunk['chunk']
+        context += chunk["chunk"]
         context += "\n\n"
         score.append(chunk['score'])
 
