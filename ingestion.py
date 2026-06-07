@@ -29,7 +29,7 @@ def read_pdf(pdf_path):
 
     return page_count , pages
 
-def create_chunk(text, chunk_size=300, overlap=50):
+def create_chunk(text, chunk_size=100, overlap=20):
     """parameters: text (actual cleaned text returned from read_pdf func() 
 
     chunk_size = 300 (default) size each chunk will be broken into
