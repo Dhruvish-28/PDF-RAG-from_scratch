@@ -1,8 +1,12 @@
-# 📄 PDF RAG Chatbot (From Scratch)
+# PDF RAG Chatbot (FAISS Version)
+
+This branch contains the FAISS-powered version of the project.
+
+For the original manual cosine-similarity implementation, see the `main`branch.
 
 ## 📌 Project Overview
 
-Built a Retrieval-Augmented Generation (RAG) chatbot from scratch without LangChain using Sentence Transformers, cosine similarity retrieval, Gemini 2.5 Flash, and Streamlit.
+Built a Retrieval-Augmented Generation (RAG) chatbot from scratch without LangChain using Sentence Transformers, Top-K Retrieval using FAISS (IndexFlatIP), Gemini 2.5 Flash, and Streamlit.
 
 The system converts uploaded PDFs into vector embeddings, retrieves relevant document chunks using semantic search, and generates grounded answers while displaying source pages and retrieval scores for transparency.
 
@@ -53,11 +57,15 @@ This allows users to verify where information originated before trusting the gen
 * Overlapping Text Chunking
 * Semantic Embeddings using Sentence Transformers
 * Vector Storage using NumPy
-* Top-K Retrieval using Cosine Similarity
+* FAISS Vector Indexing
 * Prompt Engineering for Grounded Responses
 * Gemini API Integration
 * Automated PDF Ingestion Pipeline
 * Built Completely Without LangChain
+* Fast Similarity Search
+* Page-Level Source References
+* Similarity Score Display
+* Chat History
 
 ---
 
@@ -95,10 +103,12 @@ vector_db/
 ├── document_1/
 │   ├── chunks.json
 │   └── embeddings.npy
+|   └── index.faiss
 │
 ├── document_2/
 │   ├── chunks.json
 │   └── embeddings.npy
+|   └── index.faiss
 ```
 
 ---
@@ -112,7 +122,7 @@ User Question
 Query Embedding
       │
       ▼
-Cosine Similarity Search
+FAISS (IndexFlatIP)
       │
       ▼
 Top-K Retrieval
@@ -157,6 +167,13 @@ RAG_Project/
 ```
 
 ---
+## Why FAISS?
+
+The initial version of this project used brute-force cosine similarity retrieval.
+
+This version integrates FAISS (Facebook AI Similarity Search) to provide an optimized vector search architecture while maintaining retrieval quality.
+
+The project currently uses IndexFlatIP with L2-normalized embeddings to approximate cosine similarity search.
 
 # 🧠 Retrieval Workflow
 
@@ -248,10 +265,12 @@ Answer
 |------------|--------|
 | Embedding Model | all-MiniLM-L6-v2 |
 | Embedding Dimension | 384 |
-| Chunk Size | 300 Words |
-| Chunk Overlap | 50 Words |
-| Top-K Retrieval | 3 |
-
+| Chunk Size | 100 words |
+| Chunk Overlap | 20 words |
+| Retrieval Engine | FAISS |
+| Index Type | IndexFlatIP |
+| Similarity | Cosine Similarity (Normalized Vectors) |
+| LLM | Gemini 2.5 Flash |
 # ⚙️ Installation
 
 Clone the repository:
@@ -267,7 +286,7 @@ Install dependencies:
 pip install -r requirements.txt
 ```
 
-Create a `.env` file:
+Create a `.env`file:
 
 ```env
 GEMINI_API_KEY=YOUR_API_KEY
@@ -327,14 +346,9 @@ A research problem is the first and most important step in the research process.
 
 ## 7. Update Future Improvements
 
-Current list includes Streamlit UI and Multi-PDF support, but you've already completed Streamlit. :contentReference[oaicite:3]{index=3}
-
-Replace with:
-
 ```md
 ## 🔮 Future Improvements
 
-- FAISS Integration
 - Multi-PDF Retrieval
 - Cross-Document Search
 - Source Citations in Answers
