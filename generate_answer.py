@@ -17,8 +17,6 @@ def generate_answer(query, chunks , chunk_embedding):
     selected_chunks = retrieval(query, chunks , chunk_embedding)
 
     prompt,score = build_prompt(selected_chunks, query)
-
-    print(f"Similarity Scores of top 3 chunks: {score}")
     
     response = model.generate_content(prompt)
     
