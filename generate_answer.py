@@ -2,7 +2,7 @@ from retrieve import retrieval
 from prompt_builder import build_prompt
 from gemini_model import model
 
-def generate_answer(query, chunks , chunk_embedding):
+def generate_answer(query, chunks , chunk_embedding, index):
     """
     parameters:
     query : user passed query
@@ -14,7 +14,7 @@ def generate_answer(query, chunks , chunk_embedding):
     At last LLM generates response
     """
     
-    selected_chunks = retrieval(query, chunks , chunk_embedding)
+    selected_chunks = retrieval(query, chunks , chunk_embedding, index)
 
     prompt,score = build_prompt(selected_chunks, query)
     

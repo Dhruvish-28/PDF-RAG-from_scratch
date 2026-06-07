@@ -1,6 +1,7 @@
 from embedding_model import model
 from pypdf import PdfReader
 import numpy as np
+import faiss
 import json
 import re
 import os
@@ -102,6 +103,19 @@ def ingest(pdf_path):
     
     embeddings = generate_embeddings(chunk_texts)
 
+    embeddings = embeddings.astype("float32")
+
+    faiss.normalize_L2(embeddings)
+    
+    index = faiss.IndexFlatIP(384)
+
+    index.add(embeddings)
+
+    faiss.write_index(
+    index,
+    f"{output_folder}/index.faiss"
+    )
+    
     with open(
         f"{output_folder}/chunks.json",
         "w",

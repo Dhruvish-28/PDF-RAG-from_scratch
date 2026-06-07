@@ -1,9 +1,9 @@
-# from embedding_model import model
 from ingestion import generate_embeddings
-from sklearn.metrics.pairwise import cosine_similarity
+# from sklearn.metrics.pairwise import cosine_similarity
 import numpy as np
+import faiss
 
-def retrieval(query , chunks , chunk_embedding,top_k = 3):
+def retrieval(query , chunks , chunk_embedding,index):
     """
     parameters: 
     query : user passed query,
@@ -11,25 +11,24 @@ def retrieval(query , chunks , chunk_embedding,top_k = 3):
     chunk_embedding : embeddings made from chunks,
     top_k : top k chunks which are most similar to query
     """
+    top_k = 3
     
     query_embedding = generate_embeddings(query)
-
-    similarities = cosine_similarity( [query_embedding], chunk_embedding) # calculates similarity between user query and each chunk
+    query_embedding = np.array( [query_embedding], dtype="float32")
+    faiss.normalize_L2(query_embedding)
     
-    indices = np.argsort(similarities[0])[-top_k:][::-1] # sorts for highest similarities and takes top K
+
+    # Below index searches top k defined chunks from index and then returns the indices
+    scores, indices = index.search( query_embedding, top_k )
 
     retrieved_chunks = []
         
-    for idx in indices:
-
-        # converts numpy objects into normal floating numbers and select upto 4 decimal values
-        score = float(similarities[0][idx])
-        score = round(float(similarities[0][idx]), 4)
+    for idx, score in zip( indices[0], scores[0]):
         
         retrieved_chunks.append({
-            "index": idx,
-            "page" : chunks[idx]["page"],
-            "score": score,
+            "index": int(idx),
+            "page": chunks[idx]["page"],
+            "score": round(float(score), 4),
             "chunk": chunks[idx]["chunk"]
         })
 

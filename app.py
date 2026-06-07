@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import faiss
 import time
 import json
 import os
@@ -57,9 +58,12 @@ if file is not None:
     with open( f"vector_db/{document_name}/chunks.json","r",encoding="utf-8") as f: 
         chunks = json.load(f)
 
+    index = faiss.read_index(f"vector_db/{document_name}/index.faiss" )
+
     st.session_state.document_name = document_name
     st.session_state.chunks = chunks
     st.session_state.chunk_embedding = chunk_embedding
+    st.session_state.index = index
 
 for message in st.session_state.messages:
                 
@@ -82,7 +86,7 @@ if question:
 
             with st.spinner("Thinking..."):
 
-                selected_chunks , answer= generate_answer(question , st.session_state.chunks , st.session_state.chunk_embedding)
+                selected_chunks , answer= generate_answer(question , st.session_state.chunks , st.session_state.chunk_embedding , st.session_state.index)
                 st.subheader("Answer")
 
                 with st.chat_message("assistant"):
