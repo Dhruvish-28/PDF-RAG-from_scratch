@@ -58,6 +58,7 @@ This allows users to verify where information originated before trusting the gen
 * Gemini API Integration
 * Automated PDF Ingestion Pipeline
 * Built Completely Without LangChain
+* Chat history
 
 ---
 
@@ -248,8 +249,8 @@ Answer
 |------------|--------|
 | Embedding Model | all-MiniLM-L6-v2 |
 | Embedding Dimension | 384 |
-| Chunk Size | 300 Words |
-| Chunk Overlap | 50 Words |
+| Chunk Size | 100 Words |
+| Chunk Overlap | 20 Words |
 | Top-K Retrieval | 3 |
 
 # ⚙️ Installation
@@ -326,10 +327,6 @@ A research problem is the first and most important step in the research process.
 ---
 
 ## 7. Update Future Improvements
-
-Current list includes Streamlit UI and Multi-PDF support, but you've already completed Streamlit. :contentReference[oaicite:3]{index=3}
-
-Replace with:
 
 ```md
 ## 🔮 Future Improvements
