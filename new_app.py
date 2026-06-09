@@ -90,21 +90,21 @@ def display_chat():
 
 def display_chunks(selected_chunks):
 
-    with st.sidebar:
+    # with st.sidebar:
 
-        with st.expander("Retrieved Chunks"):
+    with st.expander("Retrieved Chunks"):
 
-            for i, chunk in enumerate(selected_chunks,start=1):
+        for i, chunk in enumerate(selected_chunks,start=1):
 
-                st.write(f"Document: {chunk['document']}")
+            st.write(f"Document: {chunk['document']}")
 
-                st.write(f"Chunk {i}")
+            st.write(f"Chunk {i}")
 
-                st.caption(f"Page {chunk['page']} | Similarity {chunk['score']*100:.1f}%")
+            st.caption(f"Page {chunk['page']} | Similarity {chunk['score']*100:.1f}%")
 
-                st.write(chunk["chunk"])
+            st.write(chunk["chunk"])
 
-                st.divider()
+            st.divider()
 
         
 if __name__ == "__main__":
@@ -129,7 +129,7 @@ if __name__ == "__main__":
 
 
     if files:
-        
+    
         with st.sidebar:
             
             left, right = st.columns(2)
@@ -140,11 +140,15 @@ if __name__ == "__main__":
                 with st.spinner("Processing..."):
                     
                     metadata = process_files(files)
-                    df = pd.DataFrame({"index" : [1], "Total files": metadata["Documents"], "Total Pages": metadata["pages"] , "Total chunks" : metadata["total chunks"]})
-                    st.table(df , hide_index = True)
-                    
+                    st.session_state.metadata = metadata
+
                     st.session_state.loaded = True
-            
+
+            if "metadata" in st.session_state:
+                metadata = st.session_state.metadata
+                df = pd.DataFrame({"index" : [1], "Total files": metadata["Documents"], "Total Pages": metadata["pages"] , "Total chunks" : metadata["total chunks"]})
+                st.table(df , hide_index = True)
+                    
             if reset:
         
                 st.session_state.loaded = False
@@ -152,10 +156,12 @@ if __name__ == "__main__":
                 files = []
                 st.rerun()
         
-        if question:
+            if question:
+    
+                selected_chunks , answer = process_question(question)
+    
+                with st.sidebar:
+            
+                    display_chunks(selected_chunks)
 
-            selected_chunks , answer = process_question(question)
-        
-            display_chunks(selected_chunks)
-
-        display_chat()
+    display_chat()
