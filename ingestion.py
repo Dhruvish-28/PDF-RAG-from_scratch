@@ -54,7 +54,7 @@ def create_chunk(text, chunk_size=100, overlap=20):
 
     return chunks
 
-def pages_chunk(pages):
+def pages_chunk(pages , pdf_name):
     
     all_chunks = []
 
@@ -65,6 +65,7 @@ def pages_chunk(pages):
         for chunk in page_chunks:
 
             all_chunks.append({
+                "document" : pdf_name,
                 "page": page_data["page"],
                 "chunk": chunk
             })
@@ -77,7 +78,7 @@ def generate_embeddings(chunks):
     return model.encode(chunks)
 
 
-def ingest(pdf_path):
+def ingest_multiple(pdf_path):
 
     """ integrates all the following functions:
     read_pdf(doc_name),
@@ -87,29 +88,52 @@ def ingest(pdf_path):
     Also saves the chunks and their embeddings to a newly created folder in JSON and .npy formats respectively
     chunks.json and embeddings.npy
     """
-    pdf_name = os.path.splitext(
-        os.path.basename(pdf_path)
-    )[0]
+    all_chunks = []
+    all_embeddings = []
+    total_pages=0
+    documents = set()
 
-    output_folder = f"vector_db/{pdf_name}"
+
+    for file in pdf_path:
+
+        pdf_name = os.path.splitext(
+            os.path.basename(file)
+        )[0]
+
+        documents.add(pdf_name)
+        
+        page_count , pages = read_pdf(file)
+
+        total_pages += page_count
+
+        chunks = pages_chunk(pages , pdf_name)
+
+        all_chunks.extend(chunks)
+        
+        chunk_texts = [c["chunk"] for c in chunks]
+    
+        embeddings = generate_embeddings(chunk_texts)
+
+        all_embeddings.append(embeddings)
+
+    output_folder = f"vector_db"
 
     os.makedirs(output_folder, exist_ok=True)
-
-    page_count , pages = read_pdf(pdf_path)
-
-    chunks = pages_chunk(pages)
     
-    chunk_texts = [c["chunk"] for c in chunks]
+    if len(all_embeddings) == 0:
+        raise ValueError(
+        f"No embeddings generated. pdf_path={pdf_path}"
+    )
+
+    all_embeddings = np.vstack(all_embeddings)
     
-    embeddings = generate_embeddings(chunk_texts)
+    all_embeddings = all_embeddings.astype("float32")
 
-    embeddings = embeddings.astype("float32")
-
-    faiss.normalize_L2(embeddings)
+    faiss.normalize_L2(all_embeddings)
     
     index = faiss.IndexFlatIP(384)
 
-    index.add(embeddings)
+    index.add(all_embeddings)
 
     faiss.write_index(
     index,
@@ -122,18 +146,17 @@ def ingest(pdf_path):
         encoding="utf-8"
     ) as f:
 
-        json.dump(chunks, f)
+        json.dump(all_chunks, f)
 
     np.save(
         f"{output_folder}/embeddings.npy",
-        embeddings
+        all_embeddings
     )
 
-    metadata = {
-        "Pdf name" : pdf_name,
-        "pages" : page_count,
-        "total chunks" : len(chunks),
-        "chunks" : chunks
+    metadata = { 
+        "Documents" : len(documents), 
+        "pages" : total_pages , 
+        "total chunks" : len(all_chunks)
     }
 
     return metadata

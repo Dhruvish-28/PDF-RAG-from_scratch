@@ -29,7 +29,8 @@ def retrieval(query , chunks , chunk_embedding,index):
             "index": int(idx),
             "page": chunks[idx]["page"],
             "score": round(float(score), 4),
-            "chunk": chunks[idx]["chunk"]
+            "chunk": chunks[idx]["chunk"] ,
+            "document" : chunks[idx]["document"]
         })
 
     return retrieved_chunks
