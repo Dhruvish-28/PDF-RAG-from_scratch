@@ -1,14 +1,10 @@
-# PDF RAG Chatbot (FAISS Version)
+# Multi-PDF RAG Chatbot with FAISS and Gemini
 
-This branch contains the FAISS-powered version of the project.
+A Retrieval-Augmented Generation (RAG) chatbot that allows users to upload and query multiple PDF documents simultaneously. The system uses Sentence Transformers for embeddings, FAISS for vector retrieval, and Gemini 2.5 Flash for answer generation.
 
-For the original manual cosine-similarity implementation, see the `main`branch.
+The chatbot performs semantic search across all uploaded documents, retrieves the most relevant chunks, and generates context-aware answers with document and page references.
 
-## 📌 Project Overview
-
-Built a Retrieval-Augmented Generation (RAG) chatbot from scratch without LangChain using Sentence Transformers, Top-K Retrieval using FAISS (IndexFlatIP), Gemini 2.5 Flash, and Streamlit.
-
-The system converts uploaded PDFs into vector embeddings, retrieves relevant document chunks using semantic search, and generates grounded answers while displaying source pages and retrieval scores for transparency.
+---
 
 ## Why Build Without LangChain?
 
@@ -44,6 +40,7 @@ The system exposes retrieved chunks to the user.
 
 For every answer the application displays:
 
+- Document Name
 - Similarity Score
 - Source Page Number
 - Retrieved Context
@@ -52,21 +49,17 @@ This allows users to verify where information originated before trusting the gen
 
 ## 🚀 Features
 
-* PDF Text Extraction
-* Text Cleaning & Preprocessing
-* Overlapping Text Chunking
-* Semantic Embeddings using Sentence Transformers
-* Vector Storage using NumPy
-* FAISS Vector Indexing
-* Prompt Engineering for Grounded Responses
-* Gemini API Integration
-* Automated PDF Ingestion Pipeline
-* Built Completely Without LangChain
-* Fast Similarity Search
-* Page-Level Source References
-* Similarity Score Display
-* Chat History
-
+- Multi-PDF document upload
+- Unified knowledge base across uploaded PDFs
+- Semantic chunking and embedding generation
+- FAISS IndexFlatIP vector retrieval
+- Cross-document retrieval
+- Document and page-level source tracking
+- Similarity score display
+- Interactive chat interface using Streamlit
+- Retrieved chunk transparency
+- Reset knowledge base functionality
+- Chat history support
 ---
 
 # 🏗️ System Architecture
@@ -75,24 +68,15 @@ This allows users to verify where information originated before trusting the gen
 
 ```text
 PDF Upload
-      │
-      ▼
-Text Extraction
-      │
-      ▼
-Page Metadata Capture
-      │
-      ▼
+↓
+PDF Extraction
+↓
 Chunking
-      │
-      ▼
+↓
 Embedding Generation
-      │
-      ▼
-Store:
-  • Chunk Text
-  • Page Number
-  • Embeddings
+↓
+FAISS Index Creation
+      
 ```
 
 Generated files are stored as:
@@ -100,42 +84,48 @@ Generated files are stored as:
 ```text
 vector_db/
 
-├── document_1/
-│   ├── chunks.json
-│   └── embeddings.npy
-|   └── index.faiss
-│
-├── document_2/
-│   ├── chunks.json
-│   └── embeddings.npy
-|   └── index.faiss
-```
+├── chunks.json
+└── embeddings.npy
+└── index.faiss
 
 ---
 
-## Question Answering Pipeline
+## Retrieval Pipeline
 
-```text
-User Question
-      │
-      ▼
-Query Embedding
-      │
-      ▼
-FAISS (IndexFlatIP)
-      │
-      ▼
-Top-K Retrieval
-      │
-      ▼
-Prompt Construction
-      │
-      ▼
-Gemini LLM
-      │
-      ▼
-Final Answer
-```
+1. Upload one or more PDF documents.
+2. Extract text page-by-page.
+3. Generate overlapping chunks.
+4. Convert chunks into dense vector embeddings.
+5. Build a unified FAISS index.
+6. Convert user query into embedding.
+7. Retrieve Top-K relevant chunks.
+8. Construct context-aware prompt.
+9. Generate answer using Gemini.
+
+---
+
+## Example Retrieval Output
+
+Document: MachineLearning.pdf
+Page: 12
+Similarity: 91.3%
+
+Document: DeepLearning.pdf
+Page: 7
+Similarity: 88.4%
+
+Document: NLP.pdf
+Page: 3
+Similarity: 85.9%
+
+---
+
+## Results
+
+- Supports simultaneous querying across multiple PDF documents.
+- Retrieves the Top-K most relevant chunks using FAISS.
+- Displays source document names, page numbers, and similarity scores.
+- Provides transparent retrieval for easier debugging and evaluation.
 
 ---
 
@@ -144,25 +134,22 @@ Final Answer
 ```text
 RAG_Project/
 
-│── embedding_model.py
-│── gemini_model.py
+RAG-Project/
+│
+├── app.py
+├── ingestion.py
+├── retrieve.py
+├── generate_answer.py
+├── prompt_builder.py
+├── requirements.txt
 │
 ├── vector_db/
+│ ├── chunks.json
+│ ├── embeddings.npy
+│ └── index.faiss
 │
-├── pdf_reader.py
-├── chunking.py
-├── create_embeddings.py
+├── temp/
 │
-├── ingestion.py
-│
-├── retrieve.py
-├── prompt_builder.py
-├── generate_answer.py
-│
-├── ask.py 
-├── app.py
-|
-├── requirements.txt
 └── README.md
 ```
 
@@ -216,7 +203,7 @@ What should a research problem include
 
 ### Step 3: Semantic Retrieval
 
-The query embedding is compared with all document chunk embeddings using Cosine Similarity.
+The query embedding is compared with all document chunk embeddings using FAISS index
 
 ```text
 Query
@@ -255,7 +242,7 @@ Answer
 | Language              | Python                |
 | Embeddings            | Sentence Transformers |
 | Vector Storage        | NumPy                 |
-| Retrieval             | Cosine Similarity     |
+| Retrieval             | Faiss index           |
 | PDF Processing        | PyPDF                 |
 | LLM                   | Google Gemini         |
 | Environment Variables | python-dotenv         |
@@ -344,20 +331,17 @@ A research problem is the first and most important step in the research process.
 
 ---
 
-## 7. Update Future Improvements
+## Future Improvements
 
-```md
-## 🔮 Future Improvements
-
-- Multi-PDF Retrieval
-- Cross-Document Search
-- Source Citations in Answers
+- HNSW Approximate Nearest Neighbor Search
+- Advanced Chunking Strategies
+- Metadata-Based Filtering
 - Conversation Memory
-- Metadata Filtering
-- Retrieval Evaluation Metrics
 - Cloud Deployment
+- Citation-Based Answer Generation
 
 ---
+
 
 # 📚 Learning Outcomes
 
@@ -367,7 +351,6 @@ Key concepts learned:
 
 * Embeddings
 * Vector Search
-* Cosine Similarity
 * Retrieval-Augmented Generation (RAG)
 * Prompt Engineering
 * Semantic Search
