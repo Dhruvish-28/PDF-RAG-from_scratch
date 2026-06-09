@@ -30,9 +30,7 @@ Every stage of the RAG pipeline is implemented manually.
 
 ![Working model](results/working.png)
 
-### Working Demo
-
-![Demo](results/video.gif)
+### Working Demo: Checkout releases
 
 Shows:
 - Application UI
