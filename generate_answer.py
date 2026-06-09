@@ -17,7 +17,19 @@ def generate_answer(query, chunks , chunk_embedding, index):
     selected_chunks = retrieval(query, chunks , chunk_embedding, index)
 
     prompt,score = build_prompt(selected_chunks, query)
+
+    try:
+
+        response = model.generate_content(prompt)
+
+    except Exception as e:
+
+        if "quota" in str(e).lower():
+
+            st.error("Gemini API quota exhausted. This application currently uses the free tier.")
+
+        else:
     
-    response = model.generate_content(prompt)
+            st.error("An unexpected error occurred.")
     
     return selected_chunks, response.text
