@@ -1,8 +1,7 @@
 # PDF RAG Chatbot (FAISS Version)
 
 This branch contains the FAISS-powered version of the project.
-
-For the original manual cosine-similarity implementation, see the `main`branch.
+For the original manual cosine-similarity implementation, see the `main` branch.
 
 ## 📌 Project Overview
 
@@ -148,9 +147,7 @@ RAG_Project/
 │── gemini_model.py
 │
 ├── vector_db/
-│
-├── pdf_reader.py
-├── chunking.py
+|
 ├── create_embeddings.py
 │
 ├── ingestion.py
@@ -158,8 +155,6 @@ RAG_Project/
 ├── retrieve.py
 ├── prompt_builder.py
 ├── generate_answer.py
-│
-├── ask.py 
 ├── app.py
 |
 ├── requirements.txt
@@ -216,7 +211,7 @@ What should a research problem include
 
 ### Step 3: Semantic Retrieval
 
-The query embedding is compared with all document chunk embeddings using Cosine Similarity.
+The query embedding is compared with all document chunk embeddings using FAISS.
 
 ```text
 Query
