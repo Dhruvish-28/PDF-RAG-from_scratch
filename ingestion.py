@@ -1,56 +1,140 @@
 from embedding_model import model
-from pypdf import PdfReader
+from pymudpdf import PdfReader
+from docx import Document
 import numpy as np
 import faiss
 import json
+import fitz
 import re
 import os
-
+    
 def read_pdf(pdf_path):
-    "Reads the pdf , extracts text amd returns cleaned text"
+    "Reads the pdf , extracts text and returns cleaned text"
 
-    reader = PdfReader(pdf_path) 
-
-    page_count = len(reader.pages)
+    doc = fitz.open(pdf_path)
 
     pages = []
 
-    for page_num, page in enumerate(reader.pages):
-        text = page.extract_text()
+    for page_num, page in enumerate(doc):
 
-        
-        text = text.replace("\n", " ") # replace new line characters with spaces
-        text = re.sub(r"\s+", " ", text) # removes extra spaces caused due to \n removal
-        
+        text = page.get_text()
+
+        text = pre_process_text(text)
+
         pages.append({
-        "page": page_num + 1,
+            "page": page_num + 1,
+            "text": text
+        })
+
+    page_count = len(doc)
+
+    doc.close()
+
+    return page_count, pages
+
+def read_docx(file_path):
+     "Reads the docx , extracts text and returns cleaned text"
+
+    doc = Document(file_path)
+
+    text = "\n".join(
+        para.text for para in doc.paragraphs
+    )
+
+    text = pre_process_text(text)
+
+    pages = [{
+        "page": None,
         "text": text
-    })
+    }]
 
+    return 1, pages
 
-    return page_count , pages
+def read_txt(file_path):
+     "Reads the txt , extracts text and returns cleaned text"
 
-def create_chunk(text, chunk_size=100, overlap=20):
-    """parameters: text (actual cleaned text returned from read_pdf func() 
+    with open(file_path, "r", encoding="utf-8") as f:
+        text = f.read()
 
-    chunk_size = 300 (default) size each chunk will be broken into
-    overlap = 50 (default) overlapping between each chunks to not loose any information mid chunk
+    text = pre_process_text(text)
+
+    pages = [{
+        "page": None,
+        "text": text
+    }]
+
+    return 1, pages
+
+def pre_process_text(text):
+
+    clean_text = text.strip()
+
+    clean_text = re.sub(r'\r\n?', '\n', text)
+
+    clean_text = re.sub(r'\n{3,}', '\n\n', text)
+
+    clean_text = re.sub(r'[ \t]+', ' ', text)
+
+    return clean_text
+    
+def read_document(file_path):
+    "Master function to call all file reader functions"
+
+    extension = os.path.splitext(file_path)[1].lower()
+
+    match extension:
+
+        case ".pdf":
+            return read_pdf(file_path)
+
+        case ".docx":
+            return read_docx(file_path)
+
+        case ".txt":
+            return read_txt(file_path)
+
+        case ".md":
+            return read_txt(file_path)
+
+        case _:
+            raise ValueError(
+                f"Unsupported file type: {extension}"
+            )
+            
+def create_chunk(text):
     """
-    words = text.split()
+    
+    """
+    chunk_size = 200
+    overlap = 40
+    
+    paragraphs = re.split(r'\n\s*\n', text)
 
     chunks = []
+    
+    for paragraph in paragraphs:
 
-    start = 0
+        word_count = len(paragraph.split())
 
-    while start < len(words):
+        if word_count <= chunk_size:
 
-        end = start + chunk_size
+            chunks.append(paragraph)
 
-        chunk = " ".join(words[start:end])
+        else:
 
-        chunks.append(chunk)
-
-        start += chunk_size - overlap
+            # old overlapping chunking logic
+            
+            start = 0
+        
+            while start < len(paragraph):
+        
+                end = start + chunk_size
+        
+                chunk = " ".join(words[start:end])
+        
+                chunks.append(chunk)
+        
+                start += chunk_size - overlap
 
     return chunks
 
@@ -91,22 +175,22 @@ def ingest_multiple(pdf_path):
     all_chunks = []
     all_embeddings = []
     total_pages=0
-    documents = set()
+    documents = 0
 
 
     for file in pdf_path:
 
-        pdf_name = os.path.splitext(
+        file_name = os.path.splitext(
             os.path.basename(file)
         )[0]
 
-        documents.add(pdf_name)
+        documents += 1
         
-        page_count , pages = read_pdf(file)
+        page_count , pages = read_document(file)
 
         total_pages += page_count
 
-        chunks = pages_chunk(pages , pdf_name)
+        chunks = pages_chunk(pages , file_name)
 
         all_chunks.extend(chunks)
         
@@ -129,9 +213,11 @@ def ingest_multiple(pdf_path):
     
     all_embeddings = all_embeddings.astype("float32")
 
+    dimension = embeddings.shape[1]
+
     faiss.normalize_L2(all_embeddings)
     
-    index = faiss.IndexFlatIP(384)
+    index = faiss.IndexHNSWFlat(dimension, 32)
 
     index.add(all_embeddings)
 
