@@ -1,12 +1,26 @@
-# Multi-PDF RAG Chatbot with FAISS and Gemini
+# Multi-Format RAG Chatbot with FAISS HNSW and Gemini
 
 A Retrieval-Augmented Generation (RAG) chatbot that allows users to upload and query multiple PDF documents simultaneously. The system uses Sentence Transformers for embeddings, FAISS for vector retrieval, and Gemini 2.5 Flash for answer generation.
 
 The chatbot performs semantic search across all uploaded documents, retrieves the most relevant chunks, and generates context-aware answers with document and page references. This is the latest branch for now; older versions are
 
-v1.0.0: 'main' branch -> features manual retrieval and single pdf support\
-v2.0.0: 'Faiss-IndexflatIp' branch -> implemented Faiss indexing\
-v3.0.0 (this): 'multi-pdf' branch -> supports multi-PDF and unified vector base
+v1.0.0: main
+- Single PDF support
+- Manual cosine similarity retrieval
+
+v2.0.0: Faiss-IndexFlatIP
+- FAISS IndexFlatIP retrieval
+
+v3.0.0: multi-pdf
+- Multi-PDF support
+- Unified vector database
+
+v4.0.0: v4
+- Multi-format document support
+- Paragraph-aware recursive chunking
+- HNSW retrieval
+- Conversation memory
+- Improved metadata handling
 
 ---
 
@@ -55,17 +69,19 @@ This allows users to verify where information originated before trusting the gen
 
 ## 🚀 Features
 
-- Multi-PDF document upload
-- Unified knowledge base across uploaded PDFs
-- Semantic chunking and embedding generation
-- FAISS IndexFlatIP vector retrieval
-- Cross-document retrieval
-- Document and page-level source tracking
-- Similarity score display
-- Interactive chat interface using Streamlit
-- Retrieved chunk transparency
-- Reset knowledge base functionality
-- Chat history support
+- Multi-format document support (PDF, DOCX, TXT, MD)
+- Multi-document upload
+- Unified knowledge base
+- Paragraph-aware recursive chunking
+- Sentence Transformer embeddings
+- FAISS HNSW approximate nearest neighbor retrieval
+- Conversation-aware responses
+- Source citations
+- Similarity score visualization
+- Retrieval transparency
+- Metadata dashboard
+- Reset knowledge base
+- Streamlit chat interface
 ---
 
 # 🏗️ System Architecture
@@ -73,15 +89,20 @@ This allows users to verify where information originated before trusting the gen
 ## Document Ingestion Pipeline
 
 ```text
-PDF Upload
-↓
-PDF Extraction
-↓
-Chunking
-↓
+Document Upload
+(PDF / DOCX / TXT / MD)
+           ↓
+Document Reader
+           ↓
+Text Cleaning
+           ↓
+Paragraph-Aware Recursive Chunking
+           ↓
 Embedding Generation
-↓
-FAISS Index Creation
+           ↓
+FAISS HNSW Index
+           ↓
+Store Vector Database
       
 ```
 
@@ -98,15 +119,21 @@ vector_db/
 
 ## Retrieval Pipeline
 
-1. Upload one or more PDF documents.
-2. Extract text page-by-page.
-3. Generate overlapping chunks.
-4. Convert chunks into dense vector embeddings.
-5. Build a unified FAISS index.
-6. Convert user query into embedding.
-7. Retrieve Top-K relevant chunks.
-8. Construct context-aware prompt.
-9. Generate answer using Gemini.
+User Query
+      ↓
+Query Embedding
+      ↓
+HNSW Retrieval
+      ↓
+Top-K Chunks
+      ↓
+Conversation Memory
+      ↓
+Prompt Builder
+      ↓
+Gemini 2.5 Flash
+      ↓
+Answer + Sources
 
 ---
 
@@ -160,13 +187,18 @@ RAG-Project/
 ```
 
 ---
-## Why FAISS?
+## Why HNSW?
 
-The initial version of this project used brute-force cosine similarity retrieval.
+The project initially used brute-force cosine similarity retrieval and later upgraded to FAISS IndexFlatIP.
 
-This version integrates FAISS (Facebook AI Similarity Search) to provide an optimized vector search architecture while maintaining retrieval quality.
+This version uses FAISS HNSW (Hierarchical Navigable Small World Graphs), an Approximate Nearest Neighbor (ANN) search algorithm that organizes embeddings into a multi-layer graph structure.
 
-The project currently uses IndexFlatIP with L2-normalized embeddings to approximate cosine similarity search.
+Benefits:
+
+- Faster retrieval at scale
+- Better scalability for larger knowledge bases
+- Efficient graph-based nearest neighbor search
+- Industry-standard vector retrieval approach
 
 # 🧠 Retrieval Workflow
 
@@ -242,28 +274,31 @@ Answer
 ---
 
 # 🛠️ Technologies Used
-
 | Category              | Technology            |
 | --------------------- | --------------------- |
 | Language              | Python                |
+| UI                    | Streamlit             |
+| Document Processing   | PyMuPDF               |
+| Word Processing       | python-docx           |
 | Embeddings            | Sentence Transformers |
-| Vector Storage        | NumPy                 |
-| Retrieval             | Faiss index           |
-| PDF Processing        | PyPDF                 |
-| LLM                   | Google Gemini         |
+| Vector Search         | FAISS HNSW            |
+| LLM                   | Gemini 2.5 Flash      |
+| Storage               | JSON + NumPy          |
 | Environment Variables | python-dotenv         |
-| Data Storage          | JSON                  |
 
-| Parameter | Value |
-|------------|--------|
-| Embedding Model | all-MiniLM-L6-v2 |
-| Embedding Dimension | 384 |
-| Chunk Size | 100 words |
-| Chunk Overlap | 20 words |
-| Retrieval Engine | FAISS |
-| Index Type | IndexFlatIP |
-| Similarity | Cosine Similarity (Normalized Vectors) |
-| LLM | Gemini 2.5 Flash |
+| Parameter           | Value                              |
+| ------------------- | ---------------------------------- |
+| Embedding Model     | all-MiniLM-L6-v2                   |
+| Embedding Dimension | 384                                |
+| Chunking Strategy   | Paragraph-Aware Recursive Chunking |
+| Retrieval Engine    | FAISS                              |
+| Index Type          | HNSW                               |
+| M                   | 32                                 |
+| efConstruction      | 200                                |
+| efSearch            | 100                                |
+| Similarity Metric   | Cosine Similarity (L2 Normalized)  |
+| LLM                 | Gemini 2.5 Flash                   |
+
 # ⚙️ Installation
 
 Clone the repository:
@@ -287,19 +322,20 @@ GEMINI_API_KEY=YOUR_API_KEY
 
 ---
 
-# ▶️ Usage
+## ▶️ Usage
 
-Initialise entry point by following command:
+Run the application:
+
 ```bash
-streamlit run app.py
+streamlit run new_app.py
 
-Steps:
-
-1. Upload a PDF
-2. Wait for ingestion
-3. Ask questions
-4. View retrieved chunks and source pages
-5. Inspect similarity scores
+Steps
+1. Upload one or more documents.
+2. Click Process Files.
+3. Wait for vector database generation.
+4. Ask questions about uploaded documents.
+5. Inspect retrieved chunks and sources.
+6. Continue asking follow-up questions using conversation memory.
 
 
 The system automatically:
@@ -339,15 +375,33 @@ A research problem is the first and most important step in the research process.
 
 ## Future Improvements
 
-- HNSW Approximate Nearest Neighbor Search
-- Advanced Chunking Strategies
-- Metadata-Based Filtering
-- Conversation Memory
-- Cloud Deployment
-- Citation-Based Answer Generation
+- Persistent knowledge-base sessions
+- Query expansion
+- Metadata filtering
+- Reranking
+- Streamlit Cloud deployment
+- LangChain implementation
+- Parent-document retrieval
+- Advanced evaluation metrics
 
 ---
 
+## Key Improvements in V4
+
+### Multi-Format Support
+Supports PDF, DOCX, TXT, and Markdown documents.
+
+### Recursive Chunking
+Introduced paragraph-aware recursive chunking to preserve document structure and improve retrieval quality.
+
+### HNSW Retrieval
+Replaced IndexFlatIP with FAISS HNSW for scalable approximate nearest neighbor search.
+
+### Conversation Memory
+Recent chat history is injected into prompts, enabling context-aware follow-up questions.
+
+### Improved Metadata Handling
+Supports mixed document formats while preserving source attribution and retrieval transparency.
 
 # 📚 Learning Outcomes
 
