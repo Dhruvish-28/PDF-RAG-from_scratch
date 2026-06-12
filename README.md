@@ -4,10 +4,6 @@ A Retrieval-Augmented Generation (RAG) chatbot that allows users to upload and q
 
 The chatbot performs semantic search across all uploaded documents, retrieves the most relevant chunks, and generates context-aware answers with document and page references. This is the latest branch for now; older versions are
 
-v1.0.0: 'main' branch -> features manual retrieval and single pdf support\
-v2.0.0: 'Faiss-IndexflatIp' branch -> implemented Faiss indexing\
-v3.0.0 (this): 'multi-pdf' branch -> supports multi-PDF and unified vector base
-
 ---
 
 ## Why Build Without LangChain?
