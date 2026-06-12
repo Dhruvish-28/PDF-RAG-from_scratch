@@ -9,10 +9,11 @@ from ingestion import ingest_multiple
 from generate_answer import generate_answer
 
 if "messages" not in st.session_state:
-        st.session_state.messages = []
+    st.session_state.messages = []
 
 if "loaded" not in st.session_state:
-        st.session_state.loaded = False
+    st.session_state.loaded = False
+
 
 def process_files(files):
 
@@ -66,7 +67,9 @@ def load_embeddings():
 
 def process_question(question):
 
-    selected_chunks , answer= generate_answer(question , st.session_state.chunks , st.session_state.chunk_embedding , st.session_state.index)
+    recent_conversation = (st.session_state.messages or [])[-6:]
+    
+    selected_chunks , answer= generate_answer(question , st.session_state.chunks , st.session_state.chunk_embedding , st.session_state.index , recent_conversation)
 
     st.session_state.messages.append({
         "role": "user",
@@ -87,10 +90,8 @@ def display_chat():
         with st.chat_message(message["role"]):
 
             st.markdown( message["content"])
-
+    
 def display_chunks(selected_chunks):
-
-    # with st.sidebar:
 
     with st.expander("Retrieved Chunks"):
 
@@ -105,9 +106,12 @@ def display_chunks(selected_chunks):
             st.write(chunk["chunk"])
 
             st.divider()
-
+            
         
 if __name__ == "__main__":
+
+    with st.spinner("Loading"):
+        pass
 
     st.set_page_config(
     page_title="PDF RAG Chatbot",
@@ -125,15 +129,16 @@ if __name__ == "__main__":
 
         st.header("Document Upload")
             
-        files = st.file_uploader("Upload your PDF" , type=["pdf"] , accept_multiple_files=True)
+        files = st.file_uploader("Upload your Files" , type=["pdf","docx","txt","md"] , accept_multiple_files=True)
 
 
     if files:
+
     
         with st.sidebar:
             
             left, right = st.columns(2)
-            process = left.button("Process PDFs")
+            process = left.button("Process Files")
             reset = right.button("Reset session")
     
             if process:
@@ -144,15 +149,16 @@ if __name__ == "__main__":
 
                     st.session_state.loaded = True
 
-            if "metadata" in st.session_state:
+            if "metadata" in st.session_state and st.session_state.metadata != None:
                 metadata = st.session_state.metadata
-                df = pd.DataFrame({"index" : [1], "Total files": metadata["Documents"], "Total Pages": metadata["pages"] , "Total chunks" : metadata["total chunks"]})
+                df = pd.DataFrame({"index" : [1], "Total files": metadata["Documents"] , "Total chunks" : metadata["total chunks"]})
                 st.table(df , hide_index = True)
                     
             if reset:
         
                 st.session_state.loaded = False
                 st.session_state.messages = []
+                st.session_state.metadata = None
                 files = []
                 st.rerun()
         
@@ -161,7 +167,7 @@ if __name__ == "__main__":
                 selected_chunks , answer = process_question(question)
     
                 with st.sidebar:
-            
+                    
                     display_chunks(selected_chunks)
 
     display_chat()

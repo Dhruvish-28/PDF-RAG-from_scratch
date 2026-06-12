@@ -3,17 +3,27 @@ from ingestion import generate_embeddings
 import numpy as np
 import faiss
 
-def retrieval(query , chunks , chunk_embedding,index):
+def retrieval(query , chunks , chunk_embedding,index,convo):
     """
     parameters: 
     query : user passed query,
     chunks : all the chunks made from uploaded pdf,
     chunk_embedding : embeddings made from chunks,
     top_k : top k chunks which are most similar to query
+    index: embeddings index HSFW
+    convo : last 3 user assisstant conversation
     """
     top_k = 3
+
+    if len(convo) >= 2:
+
+        retrieval_query = (convo[-2]["content"] + " " + query)
+
+    else:
+        retrieval_query = query
+
     
-    query_embedding = generate_embeddings(query)
+    query_embedding = generate_embeddings(retrieval_query)
     query_embedding = np.array( [query_embedding], dtype="float32")
     faiss.normalize_L2(query_embedding)
     

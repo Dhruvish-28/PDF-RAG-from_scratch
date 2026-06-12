@@ -1,5 +1,4 @@
 from embedding_model import model
-from pymudpdf import PdfReader
 from docx import Document
 import numpy as np
 import faiss
@@ -26,32 +25,30 @@ def read_pdf(pdf_path):
             "text": text
         })
 
-    page_count = len(doc)
-
     doc.close()
 
-    return page_count, pages
+    return pages
 
 def read_docx(file_path):
-     "Reads the docx , extracts text and returns cleaned text"
-
+    "Reads the docx , extracts text and returns cleaned text"
+    
     doc = Document(file_path)
-
+    
     text = "\n".join(
         para.text for para in doc.paragraphs
     )
-
+    
     text = pre_process_text(text)
-
+    
     pages = [{
         "page": None,
         "text": text
     }]
-
-    return 1, pages
+    
+    return pages
 
 def read_txt(file_path):
-     "Reads the txt , extracts text and returns cleaned text"
+    "Reads the txt , extracts text and returns cleaned text"
 
     with open(file_path, "r", encoding="utf-8") as f:
         text = f.read()
@@ -63,7 +60,7 @@ def read_txt(file_path):
         "text": text
     }]
 
-    return 1, pages
+    return pages
 
 def pre_process_text(text):
 
@@ -130,7 +127,7 @@ def create_chunk(text):
         
                 end = start + chunk_size
         
-                chunk = " ".join(words[start:end])
+                chunk = " ".join(paragraph[start:end])
         
                 chunks.append(chunk)
         
@@ -186,9 +183,7 @@ def ingest_multiple(pdf_path):
 
         documents += 1
         
-        page_count , pages = read_document(file)
-
-        total_pages += page_count
+        pages = read_document(file)
 
         chunks = pages_chunk(pages , file_name)
 
@@ -240,8 +235,7 @@ def ingest_multiple(pdf_path):
     )
 
     metadata = { 
-        "Documents" : len(documents), 
-        "pages" : total_pages , 
+        "Documents" : documents, 
         "total chunks" : len(all_chunks)
     }
 
