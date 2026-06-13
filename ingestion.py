@@ -213,6 +213,8 @@ def ingest_multiple(pdf_path):
     faiss.normalize_L2(all_embeddings)
     
     index = faiss.IndexHNSWFlat(dimension, 32)
+    index.hnsw.efConstruction = 200
+    index.hnsw.efSearch = 100
 
     index.add(all_embeddings)
 
