@@ -106,7 +106,12 @@ def display_chunks(selected_chunks):
             st.write(chunk["chunk"])
 
             st.divider()
-            
+
+SUPPORTED_FILES = [".pdf", ".docx", ".txt", ".md"]
+
+invalid_files = []
+
+
         
 if __name__ == "__main__":
 
@@ -134,6 +139,22 @@ if __name__ == "__main__":
 
     if files:
 
+        for file in uploaded_files:
+
+        extension = os.path.splitext(file.name)[1].lower()
+
+        if extension not in SUPPORTED_FILES:
+            invalid_files.append(file.name)
+
+            if invalid_files:
+
+                st.error(
+                    f"Unsupported file format(s): {', '.join(invalid_files)}"
+                )
+
+                st.info(
+                    "Supported formats: PDF, DOCX, TXT and MD"
+                )            
     
         with st.sidebar:
             
